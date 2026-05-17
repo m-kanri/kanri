@@ -1568,14 +1568,14 @@ function doSave(email){
     email,
     remarks:document.getElementById('remarks').value.trim(),
     actions:document.getElementById('actions').value.trim(),
-    // 写真データ（各ステップの撮影画像）
+    // 写真はGoogleドライブに保存済みのためURLのみ送信
     photos:{
-      carton:  S.b64[0] || null,  // 段ボール
-      barcode: S.b64[1] || null,  // 化粧箱バーコード
-      lot:     S.b64[2] || null,  // 化粧箱製造ロット
-      inkjet:  S.b64[3] || null,  // インクジェッター
-      tablet:  S.b64[4] || null,  // タブレット
-      defect:  S.b64[5] || null,  // 不良品
+      carton:  null,
+      barcode: null,
+      lot:     null,
+      inkjet:  null,
+      tablet:  null,
+      defect:  null,
     },
     results:{
       // 段ボール
