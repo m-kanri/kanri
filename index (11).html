@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Permissions-Policy" content="camera=*">
+<meta http-equiv="Feature-Policy" content="camera *">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>F社高速_員数管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:root{
+  --bg:#0C1018;--bg2:#141B27;--bg3:#1B2436;--card:#1F2B3E;
+  --border:#263348;--border2:#344560;
+  --acc:#2E7DFF;--acc2:#4D5EFF;--acc-g:rgba(46,125,255,0.15);
+  --ok:#1DB96A;--ok-bg:rgba(29,185,106,0.1);
+  --ng:#FF4040;--ng-bg:rgba(255,64,64,0.1);
+  --warn:#F0A020;--warn-bg:rgba(240,160,32,0.1);
+  --tx:#DDE5F5;--tx2:#8A9BBF;--tx3:#4A5E80;
+  --r:12px;--r2:16px;--sans:'Noto Sans JP',sans-serif;
+}
+html,body{height:100%;min-height:100dvh;background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:clamp(11px,2.8vw,14px);line-height:1.8;overflow-x:hidden}
+
+/* ヘッダー */
+.hd{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top));display:flex;align-items:center;gap:17px}
+.hd-ic{width:36px;height:36px;border-radius:10px;flex-shrink:0;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-size:clamp(10px,3.1vw,12px)}
+.hd-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,3.1vw,12px);font-weight:700;letter-spacing:.04em;flex:1}
+.hd-d{font-size:clamp(10px,3.1vw,12px);color:var(--tx2);background:var(--bg3);padding:4px 12px;border-radius:16px;border:1px solid var(--border)}
+
+/* プログレス */
+.pg{height:3px;background:var(--bg3)}
+.pg-f{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .35s}
+
+/* ステップナビ */
+.steps{display:flex;align-items:center;padding:10px 8px 8px;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+.step{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none;min-width:72px;cursor:pointer;opacity:.35;transition:opacity .2s}
+.step.on{opacity:1}.step.done{opacity:.75}
+.sd{width:48px;height:48px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--tx2);transition:all .2s}
+.step.on .sd{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 12px rgba(46,125,255,.5)}
+.step.done .sd{background:var(--ok);border-color:var(--ok);color:#fff}
+.sl{font-size:clamp(10px,3.1vw,12px);color:var(--tx2);white-space:nowrap;text-align:center;font-weight:500}
+.step.on .sl{color:var(--acc);font-weight:700}
+.sc{width:12px;height:2px;background:var(--border);flex-shrink:0;margin-bottom:20px}
+
+/* コンテンツ */
+.ct{padding:0 0 140px;max-width:100%;margin:0 auto;width:100%}
+
+/* カード */
+.cd{background:var(--card);border:none;border-top:1px solid var(--border);border-bottom:none;border-radius:0;margin:0;overflow:hidden;width:100%}
+.cd-h{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:nowrap;background:rgba(46,125,255,0.05)}
+.cd-s{font-size:clamp(10px,3.1vw,12px);background:var(--acc-g);color:var(--acc);border:1px solid rgba(46,125,255,.3);border-radius:8px;padding:8px 16px;flex-shrink:0;font-weight:700;white-space:nowrap}
+.cd-t{font-size:clamp(10px,3.1vw,12px);font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-st{font-size:clamp(10px,3.1vw,12px);padding:6px 14px;border-radius:14px;flex-shrink:0;font-weight:600}
+.st-d{background:var(--ok-bg);color:var(--ok);border:1px solid rgba(29,185,106,.3)}
+.st-w{background:var(--bg3);color:var(--tx3);border:1px solid var(--border)}
+.cd-b{padding:12px 16px}
+
+/* 説明文 */
+.desc{font-size:clamp(10px,3.1vw,12px);color:var(--tx2);margin-bottom:8px;line-height:1.6}
+.desc strong{color:var(--tx)}
+
+/* 撮影ゾーン */
+.zone{border:2px dashed var(--border2);border-radius:var(--r);background:var(--bg3);cursor:pointer;overflow:hidden;transition:all .2s;position:relative}
+.zone:active{border-color:var(--acc);background:rgba(46,125,255,.06)}
+.zone.ok{border-style:solid;border-color:var(--ok)}
+.ph{padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.ph-ic{font-size:clamp(10px,3.1vw,12px);opacity:.5}
+.ph-lb{font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--tx2)}
+.ph-hn{font-size:clamp(10px,3.1vw,12px);color:var(--tx3);text-align:center;line-height:1.6}
+.pv-img{width:100%;height:320px;object-fit:cover;display:block}
+.pv-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(12,16,24,.88);backdrop-filter:blur(4px);padding:20px 30px;display:flex;align-items:center;gap:14px}
+.pv-ok{font-size:clamp(10px,3.1vw,12px);color:var(--ok);flex:1;font-weight:600}
+.re-b{font-size:clamp(10px,3.1vw,12px);font-family:var(--sans);background:rgba(255,64,64,.15);color:#FF8888;border:1px solid rgba(255,64,64,.3);border-radius:8px;padding:18px 38px;cursor:pointer;font-weight:600}
+input[type=file]{display:none}
+
+/* スキャン中 */
+.scanning{margin-top:10px;padding:20px 16px;background:var(--acc-g);border:1px solid rgba(46,125,255,.22);border-radius:var(--r);display:flex;align-items:center;gap:17px;font-size:clamp(10px,3.1vw,12px);color:#7AB0FF;font-weight:500}
+.dots span{display:inline-block;width:6px;height:6px;background:currentColor;border-radius:50%;margin-left:4px;animation:db 1.1s ease infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* 認識結果ボックス */
+.mbox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:10px}
+.mbox-row{display:flex;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.mbox-row:last-child{border-bottom:none}
+.mbox-lbl{font-size:clamp(10px,3.1vw,12px);color:var(--tx3);width:90px;flex-shrink:0;letter-spacing:.04em;font-weight:600}
+.mbox-val{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--acc);flex:1;letter-spacing:.04em}
+
+/* 結果行（員数） */
+.rr{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.rr:last-child{border-bottom:none}
+.rl{white-space:nowrap;font-size:clamp(10px,3.1vw,12px);color:var(--tx2);flex:1;font-weight:500}
+.rv{font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--tx);min-width:84px;text-align:right}
+.rv.nd{font-size:clamp(10px,3.1vw,12px);color:var(--tx3);font-weight:400}
+.ri{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,3.1vw,12px);margin-left:12px;flex-shrink:0}
+.ri.ok{background:var(--ok-bg);color:var(--ok)}.ri.wt{background:var(--bg3);color:var(--tx3)}.ri.ng{background:var(--ng-bg);color:var(--ng)}
+
+/* ロット表示 */
+.lot-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px;margin-top:12px}
+.lot-lb{font-size:clamp(10px,3.1vw,12px);color:var(--tx3);letter-spacing:.08em;margin-bottom:10px;font-weight:600}
+.lot-v{white-space:nowrap;font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--acc);letter-spacing:.06em;padding:3px 0}
+.lot-sub{font-size:clamp(10px,3.1vw,12px);color:var(--tx2);margin-top:4px}
+
+/* 再スキャンボタン */
+.re-sc{width:100%;margin-top:8px;padding:14px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);color:var(--tx2);font-size:clamp(10px,3.1vw,12px);font-family:var(--sans);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:11px;font-weight:600;transition:all .15s}
+.re-sc:active{border-color:var(--acc);color:var(--acc)}
+
+/* 照合・チェックカード */
+.vc{border-radius:var(--r);padding:12px 14px;border:1px solid var(--border);background:var(--bg3);margin-bottom:16px;transition:all .2s}
+.vc.ok{border-color:rgba(29,185,106,.4);background:var(--ok-bg)}.vc.ng{border-color:rgba(255,64,64,.4);background:var(--ng-bg)}
+.vf{white-space:normal;font-size:clamp(10px,3.1vw,12px);color:var(--tx2);margin-bottom:10px;font-weight:500}
+.vr{font-size:clamp(10px,3.1vw,12px);font-weight:700}
+.vr.ok{color:var(--ok)}.vr.ng{color:var(--ng)}.vr.nd{color:var(--tx3);font-weight:400;font-size:clamp(10px,3.1vw,12px)}
+
+/* サマリーグリッド */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-top:10px}
+.sc2{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.sc2-l{font-size:clamp(10px,3.1vw,12px);color:var(--tx3);margin-bottom:6px;font-weight:600}
+.sc2-v{font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--tx)}
+
+/* フォーム */
+.fl{font-size:clamp(10px,3.1vw,12px);color:var(--tx2);margin-bottom:10px;font-weight:600}
+.ta{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px;font-size:clamp(10px,3.1vw,12px);color:var(--tx);font-family:var(--sans);outline:none;resize:vertical;min-height:130px;line-height:1.8;transition:border .2s}
+.ta:focus{border-color:var(--acc)}.ta::placeholder{color:var(--tx3)}
+.em-in{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px;font-size:clamp(10px,3.1vw,12px);color:var(--tx);font-family:var(--sans);outline:none;transition:border .2s;margin-top:10px}
+.em-in:focus{border-color:var(--acc)}.em-in::placeholder{color:var(--tx3)}
+
+/* アラート */
+.al{border-radius:var(--r);padding:10px 12px;margin-top:8px;font-size:clamp(10px,3.1vw,12px);display:flex;align-items:flex-start;gap:12px;font-weight:500}
+.al.ok{background:var(--ok-bg);border:1px solid rgba(29,185,106,.3);color:#5EE89A}
+.al.warn{background:var(--warn-bg);border:1px solid rgba(240,160,32,.3);color:#F0C060}
+.al.ng{background:var(--ng-bg);border:1px solid rgba(255,64,64,.3);color:#FF9090}
+.al.info{background:var(--acc-g);border:1px solid rgba(46,125,255,.25);color:#88B8FF}
+.al-ic{font-size:clamp(10px,3.1vw,12px);flex-shrink:0;margin-top:1px}
+
+.divider{height:1px;background:var(--border);margin:18px 0}
+.sec-lbl{font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--tx3);letter-spacing:.06em;margin:18px 0 10px}
+
+/* ボトムバー */
+.bb{position:fixed;bottom:0;left:0;right:0;background:rgba(12,16,24,.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);z-index:99;display:flex;flex-direction:row;gap:12px;padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.bb-btns{display:flex;flex-direction:row;gap:12px;padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom));width:100%}
+.btn{padding:14px;border-radius:var(--r);font-size:clamp(10px,3.1vw,12px);font-weight:700;font-family:var(--sans);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:11px;transition:all .15s;letter-spacing:.02em}
+.btn-p{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;flex:2;box-shadow:0 4px 16px rgba(46,125,255,.4)}
+.btn-p:active{opacity:.85;transform:scale(.98)}.btn-p:disabled{opacity:.28;cursor:not-allowed;box-shadow:none;transform:none}
+.btn-s{background:var(--bg3);color:var(--tx2);border:1.5px solid var(--border);flex:1;font-size:clamp(10px,3.1vw,12px)}
+.btn-s:disabled{opacity:.28;cursor:not-allowed}
+
+/* モーダル */
+.mb-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center}
+.md{background:var(--bg2);border-radius:var(--r2) var(--r2) 0 0;border:1px solid var(--border);border-bottom:none;width:100%;max-width:520px;padding:59px 46px;padding-bottom:calc(30px + env(safe-area-inset-bottom));animation:su .22s ease}
+@keyframes su{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.md h3{font-size:clamp(10px,3.1vw,12px);font-weight:700;margin-bottom:8px}
+.md p{font-size:clamp(10px,3.1vw,12px);color:var(--tx2);margin-bottom:20px}
+.md-btns{display:flex;gap:17px;margin-top:20px}
+
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* 撮影ガイド */
+.shoot-guide{
+  background:var(--bg3);border-radius:var(--r);
+  padding:12px 16px;margin-bottom:14px;
+  border:1.5px solid rgba(46,125,255,.3);
+}
+.shoot-guide-title{
+  font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--acc);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.shoot-guide-list{
+  display:flex;flex-direction:column;gap:6px;
+}
+.shoot-guide-item{
+  font-size:clamp(10px,3.1vw,12px);color:var(--tx2);
+  display:flex;align-items:flex-start;gap:8px;line-height:1.6;
+}
+.shoot-guide-item span:first-child{
+  font-size:clamp(10px,3.1vw,12px);flex-shrink:0;margin-top:1px;
+}
+.guide-frame{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;z-index:5;
+}
+.guide-frame-inner{
+  border:2.5px solid rgba(46,125,255,.7);
+  border-radius:8px;
+  
+}
+@keyframes pulse-border{
+  0%,100%{border-color:rgba(46,125,255,.7)}
+  50%{border-color:rgba(46,125,255,1)}
+}
+.guide-frame-inner{animation:pulse-border 2s ease infinite}
+.guide-label{
+  position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);
+  background:rgba(46,125,255,.85);color:#fff;
+  font-size:clamp(10px,3.1vw,12px);font-weight:700;padding:3px 10px;border-radius:20px;
+  white-space:nowrap;
+}
+.tab-ct{animation:fi .18s ease;margin:0;padding:0;width:100%;display:block}
+
+
+}
+</style>
+</head>
+<body>
+
+<div style="position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:6px 12px;padding-top:calc(6px + env(safe-area-inset-top));display:flex;align-items:center;gap:8px">
+  <div style="font-size:13px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">F社高速_員数管理</div>
+  <div id="hDate" style="font-size:12px;color:var(--tx2);background:var(--bg3);padding:3px 8px;border-radius:12px;border:1px solid var(--border);flex-shrink:0;white-space:nowrap">----/--/--</div>
+</div>
+<div class="pg"><div class="pg-f" id="pgF" style="width:14%"></div></div>
+
+<div class="steps">
+  <div class="step on" id="n0" onclick="gTab(0)"><div class="sd" id="d0">①</div><div class="sl">段ボール</div></div>
+  <div class="sc"></div>
+  <div class="step" id="n1" onclick="gTab(1)"><div class="sd" id="d1">②</div><div class="sl">化粧箱BC</div></div>
+  <div class="sc"></div>
+  <div class="step" id="n2" onclick="gTab(2)"><div class="sd" id="d2">③</div><div class="sl">製造ロット</div></div>
+  <div class="sc"></div>
+  <div class="step" id="n3" onclick="gTab(3)"><div class="sd" id="d3">④</div><div class="sl">インクジェッター</div></div>
+  <div class="sc"></div>
+  <div class="step" id="n4" onclick="gTab(4)"><div class="sd" id="d4">⑤</div><div class="sl">タブレット</div></div>
+  <div class="sc"></div>
+  <div class="step" id="n5" onclick="gTab(5)"><div class="sd" id="d5">⑥</div><div class="sl">不良品</div></div>
+  <div class="sc"></div>
+  <div class="step" id="n6" onclick="gTab(6)"><div class="sd" id="d6">✓</div><div class="sl">確認・保存</div></div>
+</div>
+
+<div class="ct">
+
+<!-- TAB 0 段ボール -->
+<div id="t0" class="tab-ct">
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">STEP 01</span><span class="cd-t">段ボール　自動判別</span><span class="cd-st st-w" id="b0">未撮影</span></div>
+    <div class="cd-b">
+      <p class="desc">段ボールを撮影してください<br>撮影後に <strong>種類を自動判別</strong> し、認証項目を切り替えます</p>
+      <div class="zone" id="z0auto" onclick="trigAuto()" style="position:relative">
+        <div class="guide-frame"><div class="guide-frame-inner" style="width:88%;height:72%">
+          <div class="guide-corner tl"></div><div class="guide-corner tr"></div>
+          <div class="guide-corner bl"></div><div class="guide-corner br"></div>
+          <div class="guide-label">段ボール全体が枠内に収まるように</div>
+        </div></div>
+        <div class="ph" id="p0auto"><div class="ph-ic">📷</div><div class="ph-lb">段ボールを撮影</div><div class="ph-hn">段ボール全体が見えるように撮影してください</div></div>
+        <div id="pv0auto" style="display:none;position:relative"><img id="im0auto" class="pv-img"><div class="pv-bar"><span class="pv-ok">✓ 撮影済み</span><button class="re-b" onclick="event.stopPropagation();trigAuto()">撮り直す</button></div></div>
+      </div>
+      <input type="file" id="f0auto" accept="image/*" capture="environment" onchange="onCapAuto(this)">
+
+      <!-- 判別中 -->
+      <div id="sc0auto" class="scanning" style="display:none">
+        <span>⚡</span><span>段ボールの種類を自動判別中<span class="dots"><span></span><span></span><span></span></span></span>
+      </div>
+
+      <!-- 判別結果バナー -->
+      <div id="typeResult" style="display:none" class="al ok">
+        <span class="al-ic" id="typeIcon">📦</span>
+        <div style="flex:1">
+          <strong id="typeName">--</strong>
+          <div style="font-size:clamp(10px,3.1vw,12px);margin-top:2px" id="typeDesc"></div>
+        </div>
+        <button onclick="retryAuto()" style="background:none;border:1px solid rgba(29,185,106,.4);color:var(--ok);border-radius:6px;padding:4px 10px;font-size:clamp(10px,3.1vw,12px);font-family:var(--sans);cursor:pointer;flex-shrink:0">撮り直す</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 印字あり の認証結果 -->
+  <div class="cd" id="ctCraft" style="display:none">
+    <div class="cd-h"><span class="cd-s">認証結果</span><span class="cd-t">段ボール（印字あり）</span><span class="cd-st st-w" id="b0craft">認識中</span></div>
+    <div class="cd-b">
+      <div id="sc0" class="scanning" style="display:none"><span>⚡</span><span>品名・製造ロット・品番を読み取り中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r0" style="display:none">
+        <div class="mbox">
+          <div class="mbox-row"><span class="mbox-lbl">品名</span><span class="mbox-val" id="db_name">--</span></div>
+          <div class="mbox-row"><span class="mbox-lbl">製造ロット</span><span class="mbox-val" id="db_lot">--</span></div>
+          <div class="mbox-row"><span class="mbox-lbl">品番</span><span class="mbox-val" id="db_code">--</span></div>
+        </div>
+        <button class="re-sc" onclick="retryAuto()">🔄 撮り直して再認識</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 無地 の認証結果 -->
+  <div class="cd" id="ctLabel" style="display:none">
+    <div class="cd-h"><span class="cd-s">認証結果</span><span class="cd-t">段ボール（無地）</span><span class="cd-st st-w" id="b0label">認識中</span></div>
+    <div class="cd-b">
+      <div id="sc0L" class="scanning" style="display:none"><span>⚡</span><span>ラベルの内容を読み取り中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r0L" style="display:none">
+        <div class="mbox">
+          <div class="mbox-row"><span class="mbox-lbl">品番</span><span class="mbox-val" id="lb_code">--</span></div>
+          <div class="mbox-row"><span class="mbox-lbl">品名</span><span class="mbox-val" id="lb_name">--</span></div>
+          <div class="mbox-row"><span class="mbox-lbl">ロット(ABC)</span><span class="mbox-val" id="lb_lot_alpha">--</span></div>
+          <div class="mbox-row"><span class="mbox-lbl">製造日付</span><span class="mbox-val" id="lb_date">--</span></div>
+        </div>
+        <button class="re-sc" onclick="retryAuto()">🔄 撮り直して再認識</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 1 化粧箱バーコード -->
+<div id="t1" class="tab-ct" style="display:none">
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">STEP 02</span><span class="cd-t">化粧箱　品番</span><span class="cd-st st-w" id="b1">未撮影</span></div>
+    <div class="cd-b">
+      <p class="desc">化粧箱のバーコード上に印刷されている <strong>品番</strong> が読み取れるように撮影してください</p>
+      <div class="zone" id="z1" onclick="trig(1)" style="position:relative">
+        <div class="guide-frame"><div class="guide-frame-inner" style="width:80%;height:40%">
+          <div class="guide-corner tl"></div><div class="guide-corner tr"></div>
+          <div class="guide-corner bl"></div><div class="guide-corner br"></div>
+          <div class="guide-label">品番・バーコードを枠内中央に</div>
+        </div></div>
+        <div class="ph" id="p1"><div class="ph-ic">📷</div><div class="ph-lb">品番部分を撮影</div><div class="ph-hn">バーコード上の品番の文字が見えるようにしてください</div></div>
+        <div id="pv1" style="display:none;position:relative"><img id="im1" class="pv-img"><div class="pv-bar"><span class="pv-ok">✓ 撮影済み</span><button class="re-b" onclick="event.stopPropagation();trig(1)">撮り直す</button></div></div>
+      </div>
+      <input type="file" id="f1" accept="image/*" capture="environment" onchange="onCap(1,this)">
+      <div id="sc1" class="scanning" style="display:none"><span>⚡</span><span>品番を読み取り中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r1" style="display:none">
+        <div class="mbox">
+          <div class="mbox-row"><span class="mbox-lbl">品番</span><span class="mbox-val" id="bc_code">--</span></div>
+        </div>
+        <button class="re-sc" onclick="rescan(1)">🔄 再認識する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2 化粧箱製造ロット -->
+<div id="t2" class="tab-ct" style="display:none">
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">STEP 03</span><span class="cd-t">化粧箱　製造ロット</span><span class="cd-st st-w" id="b2">未撮影</span></div>
+    <div class="cd-b">
+      <p class="desc">化粧箱の <strong>「製造年月日(Y.M.D)」</strong> 印刷の下にインクジェッターで印字された <strong>2段の製造ロット</strong> を撮影してください</p>
+      <div class="zone" id="z2" onclick="trig(2)" style="position:relative">
+        <div class="guide-frame"><div class="guide-frame-inner" style="width:80%;height:35%">
+          <div class="guide-corner tl"></div><div class="guide-corner tr"></div>
+          <div class="guide-corner bl"></div><div class="guide-corner br"></div>
+          <div class="guide-label">製造ロット2行を枠内中央に</div>
+        </div></div>
+        <div class="ph" id="p2"><div class="ph-ic">📷</div><div class="ph-lb">タップして撮影</div><div class="ph-hn">製造ロットの印字部分を中央にしてください</div></div>
+        <div id="pv2" style="display:none;position:relative"><img id="im2" class="pv-img"><div class="pv-bar"><span class="pv-ok">✓ 撮影済み</span><button class="re-b" onclick="event.stopPropagation();trig(2)">撮り直す</button></div></div>
+      </div>
+      <input type="file" id="f2" accept="image/*" capture="environment" onchange="onCap(2,this)">
+      <div id="sc2" class="scanning" style="display:none"><span>⚡</span><span>製造ロットを読み取り中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r2" style="display:none">
+        <div class="lot-box"><div class="lot-lb">認識した製造ロット</div><div class="lot-v" id="lv">--</div><div class="lot-sub" id="ls"></div></div>
+        <button class="re-sc" onclick="rescan(2)">🔄 再認識する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3 インクジェッター -->
+<div id="t3" class="tab-ct" style="display:none">
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">STEP 04</span><span class="cd-t">インクジェッター　印字回数</span><span class="cd-st st-w" id="b3">未撮影</span></div>
+    <div class="cd-b">
+      <p class="desc">インクジェッターの表示画面を撮影してください<br><strong>印字回数（カウント数）</strong> の数値が見えるようにしてください</p>
+      <div class="zone" id="z3" onclick="trig(3)" style="position:relative">
+        <div class="guide-frame"><div class="guide-frame-inner" style="width:75%;height:60%">
+          <div class="guide-corner tl"></div><div class="guide-corner tr"></div>
+          <div class="guide-corner bl"></div><div class="guide-corner br"></div>
+          <div class="guide-label">印字回数の数値を枠内中央に</div>
+        </div></div>
+        <div class="ph" id="p3"><div class="ph-ic">📷</div><div class="ph-lb">インクジェッター画面を撮影</div><div class="ph-hn">印字回数の数値が見えるようにしてください</div></div>
+        <div id="pv3" style="display:none;position:relative"><img id="im3" class="pv-img"><div class="pv-bar"><span class="pv-ok">✓ 撮影済み</span><button class="re-b" onclick="event.stopPropagation();trig(3)">撮り直す</button></div></div>
+      </div>
+      <input type="file" id="f3" accept="image/*" capture="environment" onchange="onCap(3,this)">
+      <div id="sc3" class="scanning" style="display:none"><span>⚡</span><span>印字回数を認識中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r3" style="display:none">
+        <div class="rr"><span class="rl">① 印字回数</span><span class="rv nd" id="v_p">--</span><span class="ri wt" id="i_p">?</span></div>
+        <button class="re-sc" onclick="rescan(3)">🔄 再認識する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4 タブレット -->
+<div id="t4" class="tab-ct" style="display:none">
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">STEP 05</span><span class="cd-t">タブレット　検査データ</span><span class="cd-st st-w" id="b4">未撮影</span></div>
+    <div class="cd-b">
+      <p class="desc">タブレットの検査結果画面を撮影してください<br><strong>検査通過数・良品数・不良数</strong> の3つが全て見えるようにしてください</p>
+      <div class="zone" id="z4" onclick="trig(4)" style="position:relative">
+        <div class="guide-frame"><div class="guide-frame-inner" style="width:85%;height:65%">
+          <div class="guide-corner tl"></div><div class="guide-corner tr"></div>
+          <div class="guide-corner bl"></div><div class="guide-corner br"></div>
+          <div class="guide-label">3つの数値が全て枠内に収まるように</div>
+        </div></div>
+        <div class="ph" id="p4"><div class="ph-ic">📷</div><div class="ph-lb">タブレット画面を撮影</div><div class="ph-hn">3つの数値が画面内に収まるように撮影</div></div>
+        <div id="pv4" style="display:none;position:relative"><img id="im4" class="pv-img"><div class="pv-bar"><span class="pv-ok">✓ 撮影済み</span><button class="re-b" onclick="event.stopPropagation();trig(4)">撮り直す</button></div></div>
+      </div>
+      <input type="file" id="f4" accept="image/*" capture="environment" onchange="onCap(4,this)">
+      <div id="sc4" class="scanning" style="display:none"><span>⚡</span><span>検査データを3項目認識中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r4" style="display:none">
+        <div class="rr"><span class="rl">② 検査通過数</span><span class="rv nd" id="v_q">--</span><span class="ri wt" id="i_q">?</span></div>
+        <div class="rr"><span class="rl">③ 良品数</span><span class="rv nd" id="v_g">--</span><span class="ri wt" id="i_g">?</span></div>
+        <div class="rr"><span class="rl">④ 不良数</span><span class="rv nd" id="v_d">--</span><span class="ri wt" id="i_d">?</span></div>
+        <button class="re-sc" onclick="rescan(4)">🔄 再認識する</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5 不良品 -->
+<div id="t5" class="tab-ct" style="display:none">
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">STEP 06</span><span class="cd-t">不良品　実物確認</span><span class="cd-st st-w" id="b5">未撮影</span></div>
+    <div class="cd-b">
+      <!-- 左右分け案内 -->
+      <div class="al warn" style="margin-top:0;margin-bottom:14px">
+        <span class="al-ic" style="font-size:clamp(10px,3.1vw,12px)">⚠️</span>
+        <div>
+          <div style="font-size:clamp(10px,3.1vw,12px);font-weight:700;margin-bottom:8px">撮影前に必ず準備してください</div>
+          <div style="font-size:clamp(10px,3.1vw,12px);line-height:2.0">
+            📋 <strong>「印字あり / có in mã số」</strong> の札を立てて不良品を並べる<br>
+            📋 <strong>「印字なし / không in mã số」</strong> の札を立てて不良品を並べる<br>
+            📦 仕切りで2つのエリアを分ける<br>
+            📷 全体が写るように撮影する
+          </div>
+        </div>
+      </div>
+      <!-- 図解 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="border:2px solid var(--ok);border-radius:var(--r);padding:10px;text-align:center;background:var(--ok-bg)">
+          <div style="font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--ok);margin-bottom:2px">「印字あり」の札</div>
+          <div style="font-size:clamp(10px,3.1vw,12px);color:var(--ok);margin-bottom:4px;opacity:.8">có in mã số</div>
+          <div style="font-size:clamp(10px,3.1vw,12px)">📋📦📦📦</div>
+          <div style="font-size:clamp(10px,3.1vw,12px);color:var(--tx3);margin-top:4px">製造番号が見えるもの</div>
+        </div>
+        <div style="border:2px solid var(--ng);border-radius:var(--r);padding:10px;text-align:center;background:var(--ng-bg)">
+          <div style="font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--ng);margin-bottom:2px">「印字なし」の札</div>
+          <div style="font-size:clamp(10px,3.1vw,12px);color:var(--ng);margin-bottom:4px;opacity:.8">không in mã số</div>
+          <div style="font-size:clamp(10px,3.1vw,12px)">📋📦📦</div>
+          <div style="font-size:clamp(10px,3.1vw,12px);color:var(--tx3);margin-top:4px">製造番号がないもの</div>
+        </div>
+      </div>
+      <p class="desc"><strong>札・仕切りで分けてから</strong>、全体が写るように撮影してください</p>
+      <div class="zone" id="z5" onclick="trig(5)" style="position:relative">
+        <div class="guide-frame"><div class="guide-frame-inner" style="width:90%;height:75%">
+          <div class="guide-corner tl"></div><div class="guide-corner tr"></div>
+          <div class="guide-corner bl"></div><div class="guide-corner br"></div>
+          <div class="guide-label">印字あり・印字なし両エリアが枠内に</div>
+        </div></div>
+        <div class="ph" id="p5"><div class="ph-ic">📷</div><div class="ph-lb">不良品を撮影</div><div class="ph-hn">左：印字あり　右：印字なし　に分けて全体を撮影</div></div>
+        <div id="pv5" style="display:none;position:relative"><img id="im5" class="pv-img"><div class="pv-bar"><span class="pv-ok">✓ 撮影済み</span><button class="re-b" onclick="event.stopPropagation();trig(5)">撮り直す</button></div></div>
+      </div>
+      <input type="file" id="f5" accept="image/*" capture="environment" onchange="onCap(5,this)">
+      <div id="sc5" class="scanning" style="display:none"><span>⚡</span><span>印字あり・なしの個数を確認中<span class="dots"><span></span><span></span><span></span></span></span></div>
+      <div id="r5" style="display:none">
+        <!-- AI認識結果 + 手入力修正 -->
+        <div class="al info" style="margin-top:0;margin-bottom:12px">
+          <span class="al-ic">🤖</span>
+          <span>AI認識結果を確認してください。<br>間違っている場合は数字を直接タップして修正できます。</span>
+        </div>
+        <div class="mbox">
+          <div class="mbox-row">
+            <span class="mbox-lbl">⑤ 印字あり</span>
+            <input type="number" id="v_ds" min="0" value="0"
+              style="font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--ok);background:transparent;border:none;border-bottom:2px solid var(--ok);width:80px;text-align:center;font-family:var(--sans);outline:none;"
+              onchange="onDefectInput()">
+            <span style="font-size:clamp(10px,3.1vw,12px);color:var(--tx2)">個</span>
+          </div>
+          <div class="mbox-row">
+            <span class="mbox-lbl">⑥ 印字なし</span>
+            <input type="number" id="v_du" min="0" value="0"
+              style="font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--ng);background:transparent;border:none;border-bottom:2px solid var(--ng);width:80px;text-align:center;font-family:var(--sans);outline:none;"
+              onchange="onDefectInput()">
+            <span style="font-size:clamp(10px,3.1vw,12px);color:var(--tx2)">個</span>
+          </div>
+          <div class="mbox-row" style="border-bottom:none">
+            <span class="mbox-lbl" style="font-weight:700">合計</span>
+            <span id="v_df_sum" style="font-size:clamp(10px,3.1vw,12px);font-weight:700;color:var(--tx)">0</span>
+            <span style="font-size:clamp(10px,3.1vw,12px);color:var(--tx2)">個</span>
+          </div>
+        </div>
+        <button class="re-sc" onclick="rescan(5)">🔄 撮り直して再認識する</button>
+      </div>
+      <div class="al info" style="margin-top:10px"><span class="al-ic">💡</span><span>不良品が0個の場合はそのまま「次へ」をタップしてください</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 6 確認・保存 -->
+<div id="t6" class="tab-ct" style="display:none">
+  <div id="saveWarnInner" style="display:none;background:#7a3a00;color:#FFDD88;font-size:clamp(10px,3.1vw,12px);font-weight:700;line-height:1.8;padding:16px 16px;border-bottom:3px solid #F0A020;word-break:break-all;"></div>
+
+  <!-- 照合チェック -->
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">照合</span><span class="cd-t" id="matchTitle">段ボール ↔ 化粧箱 照合</span></div>
+    <div class="cd-b" id="matchBody">
+      <div class="vc" id="vc_code"><div class="vf" id="vf_code">品番　段ボール ＝ 化粧箱バーコード上の印刷字</div><div class="vr nd" id="vr_code">照合待ち</div></div>
+      <div class="vc" id="vc_lot"><div class="vf" id="vf_lot">製造ロット　段ボール ＝ 化粧箱製造ロット</div><div class="vr nd" id="vr_lot">照合待ち</div></div>
+      <div class="vc" id="vc_alpha" style="display:none"><div class="vf">ロット(ABC)　ラベル ＝ 化粧箱製造ロット下段</div><div class="vr nd" id="vr_alpha">照合待ち</div></div>
+      <div class="vc" id="vc_date" style="display:none"><div class="vf">製造日付　ラベル ＝ 化粧箱製造ロット上段</div><div class="vr nd" id="vr_date">照合待ち</div></div>
+    </div>
+  </div>
+
+  <!-- 員数チェック -->
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">CHECK</span><span class="cd-t">員数チェック結果</span></div>
+    <div class="cd-b">
+      <div class="vc" id="vc1"><div class="vf">① 印字回数 ＝ ③ 良品数 ＋ ④ 不良数 － ⑥ 印字なし不良品</div><div class="vr nd" id="vr1">数値の入力待ち</div></div>
+      <div class="vc" id="vc2"><div class="vf">② 検査通過数 ＝ ③ 良品数 ＋ ④ 不良数</div><div class="vr nd" id="vr2">数値の入力待ち</div></div>
+      <div class="vc" id="vc3"><div class="vf">④ 不良数 ＝ ⑤ 印字あり不良品 ＋ ⑥ 印字なし不良品</div><div class="vr nd" id="vr3">数値の入力待ち</div></div>
+      <div id="aOK" style="display:none" class="al ok"><span class="al-ic">✅</span><span>全ての照合・員数チェックが一致しました</span></div>
+      <div id="aNG" style="display:none" class="al ng"><span class="al-ic">⚠️</span><span>一致しない項目があります。各ステップを再確認してください</span></div>
+    </div>
+  </div>
+
+  <!-- サマリー -->
+  <div class="cd" id="smCard" style="display:none">
+    <div class="cd-h"><span class="cd-s">DATA</span><span class="cd-t">読み取りデータ</span></div>
+    <div class="cd-b">
+      <div class="sec-lbl" id="sm_db_title">段ボール</div>
+      <div class="mbox" id="sm_db_craft">
+        <div class="mbox-row"><span class="mbox-lbl">品名</span><span class="mbox-val" id="sm_db_name">--</span></div>
+        <div class="mbox-row"><span class="mbox-lbl">製造ロット</span><span class="mbox-val" id="sm_db_lot">--</span></div>
+        <div class="mbox-row"><span class="mbox-lbl">品番</span><span class="mbox-val" id="sm_db_code">--</span></div>
+      </div>
+      <div class="mbox" id="sm_db_label" style="display:none">
+        <div class="mbox-row"><span class="mbox-lbl">品番</span><span class="mbox-val" id="sm_lb_code">--</span></div>
+        <div class="mbox-row"><span class="mbox-lbl">品名</span><span class="mbox-val" id="sm_lb_name">--</span></div>
+        <div class="mbox-row"><span class="mbox-lbl">ロット(ABC)</span><span class="mbox-val" id="sm_lb_alpha">--</span></div>
+        <div class="mbox-row"><span class="mbox-lbl">製造日付</span><span class="mbox-val" id="sm_lb_date">--</span></div>
+      </div>
+      <div class="sec-lbl" style="margin-top:12px">化粧箱</div>
+      <div class="mbox">
+        <div class="mbox-row"><span class="mbox-lbl">品番</span><span class="mbox-val" id="sm_bc_code">--</span></div>
+        <div class="mbox-row"><span class="mbox-lbl">製造ロット</span><span class="mbox-val" id="sm_lot">--</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="sg" id="smGrid"></div>
+    </div>
+  </div>
+
+  <!-- 不一致理由・処置 -->
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">NOTE</span><span class="cd-t">不一致理由・処置項目</span></div>
+    <div class="cd-b">
+      <div style="margin-bottom:13px">
+        <div class="fl">不一致理由</div>
+        <textarea class="ta" id="remarks" placeholder="一致しない場合、その理由を記入してください&#10;（全て一致の場合は空欄で構いません）"></textarea>
+      </div>
+      <div>
+        <div class="fl">処置項目</div>
+        <textarea class="ta" id="actions" placeholder="実施した、または実施予定の処置を記入してください&#10;（全て一致の場合は空欄で構いません）"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 写真一括保存（必須） -->
+  <div class="cd">
+    <div class="cd-h"><span class="cd-s">PHOTO</span><span class="cd-t">撮影写真の保存</span></div>
+    <div class="cd-b">
+      <div class="al warn" style="margin-top:0;margin-bottom:14px">
+        <span class="al-ic">📸</span>
+        <div style="font-size:clamp(10px,3.1vw,12px);line-height:1.8">
+          <strong>写真を端末に保存してから「保存・送信」を行ってください</strong><br>
+          保存完了後に「保存・送信」ボタンが有効になります
+        </div>
+      </div>
+      <button id="btnSavePhotos" onclick="saveAllPhotos()" style="width:100%;padding:18px;border-radius:var(--r);background:linear-gradient(135deg,#F0A020,#E08010);color:#fff;font-size:clamp(10px,3.1vw,12px);font-weight:700;font-family:var(--sans);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+        📥 撮影写真を端末に保存する（6枚）
+      </button>
+      <div id="photoSaveResult" style="display:none" class="al ok" style="margin-top:10px">
+        <span class="al-ic">✅</span><span id="photoSaveMsg">写真を保存しました</span>
+      </div>
+      <div id="photoWarn" style="display:none;margin-top:14px;padding:14px 16px;background:rgba(120,50,0,0.3);border:2px solid #F0A020;border-radius:var(--r);color:#FFDD88;font-size:clamp(10px,3.1vw,12px);font-weight:600;line-height:1.7">
+        ⚠️　写真の端末保存が完了していません<br>
+        <span style="font-size:clamp(10px,3.1vw,12px);font-weight:400">上のボタンをタップして写真を保存してください</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /ct -->
+<!-- ブラウザ内カメラモーダル -->
+<div id="camModal" style="display:none;position:fixed;inset:0;z-index:500;background:#000;flex-direction:column">
+  <div style="position:relative;flex:1;overflow:hidden">
+    <video id="camVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover"></video>
+    <!-- ガイド枠オーバーレイ -->
+    <div id="camGuide" style="position:absolute;inset:0;pointer-events:none">
+      <div id="camGuideBox" style="position:absolute;border:3px solid rgba(74,170,255,0.95);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,0.5)">
+        <div style="position:absolute;top:-4px;left:-4px;width:24px;height:24px;border-top:5px solid #4AF;border-left:5px solid #4AF;border-radius:6px 0 0 0"></div>
+        <div style="position:absolute;top:-4px;right:-4px;width:24px;height:24px;border-top:5px solid #4AF;border-right:5px solid #4AF;border-radius:0 6px 0 0"></div>
+        <div style="position:absolute;bottom:-4px;left:-4px;width:24px;height:24px;border-bottom:5px solid #4AF;border-left:5px solid #4AF;border-radius:0 0 0 6px"></div>
+        <div style="position:absolute;bottom:-4px;right:-4px;width:24px;height:24px;border-bottom:5px solid #4AF;border-right:5px solid #4AF;border-radius:0 0 6px 0"></div>
+      </div>
+      <!-- ガイドメッセージ -->
+      <div id="camGuideMsg" style="position:absolute;top:16px;left:0;right:0;text-align:center;color:#fff;font-size:clamp(10px,1.7vw,10px);font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.9);padding:8px;background:rgba(0,0,0,0.4)"></div>
+      <!-- 静止状態ステータス -->
+      <div id="camStatus" style="position:absolute;bottom:110px;left:0;right:0;text-align:center;color:#fff;font-size:clamp(10px,2.0vw,10px);font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,0.9);padding:8px"></div>
+    </div>
+  </div>
+  <!-- ボタン -->
+  <div style="background:#111;padding:16px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+    <button onclick="closeCam()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:clamp(10px,1.8vw,10px);font-family:sans-serif;padding:14px 22px;border-radius:50px;cursor:pointer">✕ キャンセル</button>
+    <button id="camShutter" onclick="shootCam()" style="width:72px;height:72px;border-radius:50%;background:#fff;border:5px solid #aaa;cursor:pointer;flex-shrink:0" title="手動撮影"></button>
+    <div style="width:80px;color:#aaa;font-size:clamp(10px,1.5vw,10px);text-align:center">手動撮影</div>
+  </div>
+</div>
+<canvas id="camCanvas" style="display:none"></canvas>
+
+
+
+<div class="bb">
+  <button class="btn btn-s" id="bPrev" onclick="prev()" disabled>← 戻る</button>
+  <button class="btn btn-p" id="bNext" onclick="next()">次へ →</button>
+</div>
+
+<div class="mb-modal" id="modal" style="display:none">
+  <div class="md">
+    <h3>📤 保存・送信</h3>
+    <p>スプレッドシートを作成し、メールでリンクを送信します</p>
+    <div id="mBody"><div class="scanning"><span>⏳</span><span>作成中<span class="dots"><span></span><span></span><span></span></span></span></div></div>
+    <div class="md-btns"><button class="btn btn-s" style="flex:1" onclick="closeModal()">閉じる</button></div>
+  </div>
+</div>
+
+<script>
+let cur=0;
+const TOTAL=7;
+const TYPES=['carton','barcode','lot','inkjet','tablet','defect'];
+const IS_GAS = false; // GitHub Pages: 常にfetch APIを使用
+// ★GASのWebアプリURL★
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzD76BZBdJ4D8eV5SiMZTqNxP9pE_LH7LgZWe1cbbkdeZR5EzodDOPX3WOsDvcR6R9_/exec';
+
+// Android iframe タッチ修正
+(function(){
+  var style = document.createElement('style');
+  style.textContent = '* { touch-action: manipulation !important; } button, .btn, .zone, .step, .re-b, .re-sc { cursor: pointer !important; -webkit-tap-highlight-color: rgba(0,0,0,0.1) !important; }';
+  document.head.appendChild(style);
+})();
+
+const S={
+  b64:[null,null,null,null,null,null],
+  url:[null,null,null,null,null,null],
+  // 段ボール共通
+  cartonType:0, // 0=未選択 1=印字あり 2=無地
+  // 段ボール（印字あり）
+  dbName:null, dbLot:null, dbLotLine1:null, dbLotLine2:null, dbCode:null,
+  // 段ボール（無地）
+  lbCode:null, lbName:null, lbAlpha:null, lbDate:null,
+  lbB64:null, lbUrl:null,
+  // 化粧箱バーコード
+  bcNum:null, bcCode:null,
+  // 化粧箱製造ロット
+  lot:null, ll1:null, ll2:null,
+  // 員数
+  pr:null, ps:null, gd:null, df:null, ds:null, du:null
+};
+
+window.addEventListener('resize',()=>{
+  const banner=document.getElementById('saveWarnBanner');
+  const bb=document.querySelector('.bb');
+  if(banner&&banner.style.display!=='none'&&bb){
+    banner.style.bottom=bb.getBoundingClientRect().height+'px';
+  }
+});
+window.addEventListener('DOMContentLoaded',()=>{
+  const n=new Date();
+  document.getElementById('hDate').textContent=
+    n.getFullYear()+'/'+(n.getMonth()+1+'').padStart(2,'0')+'/'+(''+n.getDate()).padStart(2,'0');
+  updNav();
+  startIdleTimer();
+
+});
+
+// ⑦ 30分放置でデータ自動消去
+let idleTimer=null;
+const IDLE_MINUTES=30;
+function startIdleTimer(){
+  resetIdleTimer();
+  ['touchstart','click','keydown'].forEach(ev=>{
+    document.addEventListener(ev,resetIdleTimer,{passive:true});
+  });
+}
+function resetIdleTimer(){
+  if(idleTimer) clearTimeout(idleTimer);
+  idleTimer=setTimeout(()=>{
+    const hasData=S.b64.some(b=>b!==null)||S.cartonType>0;
+    if(!hasData) return;
+    confirm('⏰ '+IDLE_MINUTES+'分間操作がありませんでした。\nセキュリティのため入力データを消去します。');
+    startNewLot();
+  }, IDLE_MINUTES*60*1000);
+}
+
+// ⑤ 保存完了後の完全リセット
+function startNewLot(){
+  closeModal();
+  S.b64=[null,null,null,null,null,null];
+  S.url=[null,null,null,null,null,null];
+  S.cartonType=0;
+  S.dbName=null;S.dbLot=null;S.dbLotLine1=null;S.dbLotLine2=null;S.dbCode=null;
+  S.lbCode=null;S.lbName=null;S.lbAlpha=null;S.lbDate=null;S.lbB64=null;S.lbUrl=null;
+  S.bcNum=null;S.bcCode=null;S.lot=null;S.ll1=null;S.ll2=null;
+  S.pr=null;S.ps=null;S.gd=null;S.df=null;S.ds=null;S.du=null;
+  S.photosSaved=false;
+  for(let i=0;i<6;i++){
+    const p=document.getElementById('p'+i);
+    const pv=document.getElementById('pv'+i);
+    const z=document.getElementById('z'+i);
+    const sc=document.getElementById('sc'+i);
+    const r=document.getElementById('r'+i);
+    if(p) p.style.display='';
+    if(pv) pv.style.display='none';
+    if(z) z.classList.remove('ok');
+    if(sc){sc.style.display='none';sc.className='scanning';}
+    if(r) r.style.display='none';
+    setBadge(i,'未撮影');
+    const cb=document.getElementById('confirmBanner'+i);
+    if(cb) cb.remove();
+  }
+  const p0a=document.getElementById('p0auto');
+  const pv0a=document.getElementById('pv0auto');
+  const z0a=document.getElementById('z0auto');
+  if(p0a) p0a.style.display='';
+  if(pv0a) pv0a.style.display='none';
+  if(z0a) z0a.classList.remove('ok');
+  ['typeResult','ctCraft','ctLabel'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+  const sc0a=document.getElementById('sc0auto');
+  if(sc0a) sc0a.style.display='none';
+  const rem=document.getElementById('remarks');
+  const act=document.getElementById('actions');
+  if(rem) rem.value='';
+  if(act) act.value='';
+  S.photosSaved=false;
+  const psr=document.getElementById('photoSaveResult');
+  const psb=document.getElementById('btnSavePhotos');
+  if(psr) psr.style.display='none';
+  if(psb){ psb.disabled=false; psb.textContent='📥 撮影写真を端末に保存する（6枚）'; psb.style.background='linear-gradient(135deg,#F0A020,#E08010)'; psb.style.backgroundImage=''; }
+  // 不良品手入力フィールドもリセット
+  const vds=document.getElementById('v_ds');
+  const vdu=document.getElementById('v_du');
+  const vsum=document.getElementById('v_df_sum');
+  if(vds) vds.value=0;
+  if(vdu) vdu.value=0;
+  if(vsum) vsum.textContent='0';
+  document.getElementById('r5').style.display='none';
+  const sw=document.getElementById('saveWarnInner');
+  if(sw) sw.style.display='none';
+  const pw2=document.getElementById('photoWarn');
+  if(pw2) pw2.style.display='none';
+  gTab(0);
+  resetIdleTimer();
+}
+
+function gTab(n){
+  document.getElementById('t'+cur).style.display='none';
+  document.getElementById('t'+n).style.display='';
+  cur=n; updNav();
+  if(n===6) rfV();
+}
+function next(){if(cur<TOTAL-1)gTab(cur+1);else openSave();}
+function prev(){if(cur>0)gTab(cur-1);}
+function updNav(){
+  for(let i=0;i<TOTAL;i++){
+    const nv=document.getElementById('n'+i);
+    nv.className='step'+(i===cur?' on':i<cur?' done':'');
+  }
+  document.getElementById('bPrev').disabled=cur===0;
+  const isLast=cur===TOTAL-1;
+  const bNext=document.getElementById('bNext');
+  bNext.textContent=isLast?'💾 保存・送信':'次へ →';
+  // ①最終タブでは全撮影完了チェック
+  if(isLast){
+    const allShot=checkAllShot();
+    const photosSaved=S.photosSaved||false;
+    bNext.disabled=!allShot||!photosSaved;
+    bNext.title=allShot?'':'未撮影のステップがあります';
+
+    const missing=[];
+    const names=['段ボール','化粧箱BC','製造ロット','インクジェッター','タブレット','不良品'];
+    for(let i=0;i<6;i++){
+      if(!S.b64[i]&&!(i===0&&(S.dbCode||S.lbCode))) missing.push(names[i]);
+    }
+    const missingReal=missing.filter(n=>n!=='不良品'||(S.df===null));
+    const msgs=[];
+    if(missingReal.length>0) msgs.push('未撮影：'+missingReal.join('・'));
+    if(!S.photosSaved) msgs.push('写真の端末保存が未完了');
+
+    // 未撮影警告 → saveWarnInner
+    const warnEl=document.getElementById('saveWarnInner');
+    if(warnEl){
+      if(missingReal.length>0){
+        warnEl.innerHTML='⚠️　'+missingReal.join('・');
+        warnEl.style.display='';
+      } else {
+        warnEl.style.display='none';
+      }
+    }
+    // 写真保存未完了 → PHOTOカード下部
+    const photoWarnEl=document.getElementById('photoWarn');
+    if(photoWarnEl){
+      photoWarnEl.style.display=!S.photosSaved?'':'none';
+    }
+    bNext.disabled=msgs.length>0;
+
+  } else {
+    document.getElementById('bNext').disabled=false;
+    const warnEl=document.getElementById('saveWarnInner');
+    if(warnEl) warnEl.style.display='none';
+    const photoWarnEl=document.getElementById('photoWarn');
+    if(photoWarnEl) photoWarnEl.style.display='none';
+  }
+  document.getElementById('pgF').style.width=((cur+1)/TOTAL*100)+'%';
+}
+
+function checkAllShot(){
+  // 段ボール：cartonType確定+認識済み
+  const step0ok = S.cartonType>0 && (S.dbCode||S.lbCode);
+  // STEP2〜5：撮影済み
+  const step1ok = !!S.b64[1];
+  const step2ok = !!S.b64[2];
+  const step3ok = !!S.b64[3];
+  const step4ok = !!S.b64[4];
+  // STEP6（不良品）：撮影済みまたはds+duが手入力済み
+  const defectDone = !!S.b64[5];
+  const defectSkip = S.df===0;
+  const step5ok = defectDone || defectSkip;
+  return step0ok&&step1ok&&step2ok&&step3ok&&step4ok&&step5ok;
+}
+
+function trig(i){
+  openCam(i, (b64, dataUrl) => {
+    S.b64[i]=b64; S.url[i]=dataUrl;
+    showPv(i);
+    savePhotoToDrive(i);
+    if(i===5){ runOcrDefect(); } else { runOcr(i); }
+  });
+}
+
+async function onCap(i,inp){
+  if(!inp.files||!inp.files[0])return;
+  const file=inp.files[0];
+  S.url[i]=URL.createObjectURL(file);
+  // 不良品（i===5）のみ400px・品質60%、その他は800px・品質75%
+  S.b64[i]=await compress(file, i===5 ? 400 : 800, i===5 ? 0.60 : 0.75);
+  showPv(i);
+  // 撮影直後にGoogleドライブに即時保存
+  savePhotoToDrive(i);
+  if(i===5){
+    await runOcrDefect();
+  } else {
+    await runOcr(i);
+  }
+}
+
+// 各ステップ撮影後にGoogleドライブに即時保存
+const STEP_NAMES=['段ボール','化粧箱品番','化粧箱製造ロット','インクジェッター','タブレット','不良品'];
+function savePhotoToDrive(i){
+  if(!S.b64[i]) return;
+  // ロット情報（未認識の場合は暫定名）
+  const lotStr=(S.ll1||S.lbDate||'未認識').replace(/[\/\.]/g,'')+
+    '_'+(S.ll2||S.lbAlpha||'');
+  const stepName=STEP_NAMES[i];
+  fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'savePhoto',b64:S.b64[i],lotStr:lotStr,stepName:stepName})})
+  .then(r=>r.json())
+  .then(res=>{ if(res.ok&&res.data&&res.data.url){ S.driveUrls=S.driveUrls||{}; S.driveUrls[i]=res.data.url; } })
+  .catch(e=>console.log('Drive保存エラー:',e));
+}
+
+function compress(file,mx,q){
+  return new Promise(res=>{
+    const rd=new FileReader();
+    rd.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas');
+        let w=img.width,h=img.height;
+        if(w>h&&w>mx){h=h*(mx/w);w=mx;}else if(h>w&&h>mx){w=w*(mx/h);h=mx;}
+        c.width=Math.round(w);c.height=Math.round(h);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',q).split(',')[1]);
+      };
+      img.src=e.target.result;
+    };
+    rd.readAsDataURL(file);
+  });
+}
+
+function showPv(i){
+  document.getElementById('p'+i).style.display='none';
+  document.getElementById('pv'+i).style.display='';
+  document.getElementById('im'+i).src=S.url[i];
+  document.getElementById('z'+i).classList.add('ok');
+}
+
+async function runOcr(i){
+  if(!S.b64[i])return;
+  const scEl=document.getElementById('sc'+i);
+  const rEl=document.getElementById('r'+i);
+  scEl.style.display='';scEl.className='scanning';
+  rEl.style.display='none';
+  document.getElementById('bNext').disabled=true;
+  document.getElementById('bPrev').disabled=true;
+
+  // タイムアウト監視
+  let timedOut=false;
+  const TIMEOUT_SEC = 50;
+  const timeoutId=setTimeout(()=>{
+    timedOut=true;
+    scEl.className='al ng';
+    const msg = i===5
+      ? '⏱ タイムアウト。数量を直接入力してください。'
+      : '⏱ タイムアウト。再度撮影してください。';
+    scEl.innerHTML='<span class="al-ic">❌</span><span>'+msg+'</span>';
+    setBadge(i,'再撮影');
+    document.getElementById('bPrev').disabled=cur===0;
+    document.getElementById('bNext').disabled=false;
+    if(i===5){
+      rEl.style.display='';
+      document.getElementById('v_ds').value=0;
+      document.getElementById('v_du').value=0;
+      updateDefectSum();
+    }
+    updNav();
+  }, TIMEOUT_SEC*1000);
+
+  // 少し待ってからGAS呼び出し（前の処理が詰まっている場合の対策）
+  await new Promise(r=>setTimeout(r, 300));
+  if(timedOut) return;
+
+  try{
+    await new Promise((ok,ng)=>{
+      fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'ocr',b64:S.b64[i],type:TYPES[i]})})
+      .then(r=>r.json())
+      .then(res=>{
+        clearTimeout(timeoutId);
+        if(timedOut) return;
+        if(res.ok){applyOcr(i,res.data);ok();}
+        else ng(new Error(res.error||'APIエラー'));
+      })
+      .catch(e=>{
+        clearTimeout(timeoutId);
+        if(!timedOut) ng(new Error(e.message||'通信エラー'));
+      });
+    });
+  }catch(e){
+    clearTimeout(timeoutId);
+    if(timedOut) return; // タイムアウト済みの場合は処理しない
+    scEl.className='al ng';
+    if(i===5){
+      scEl.innerHTML='<span class="al-ic">❌</span><span>認識できませんでした。数量を直接入力してください。<br><small style="opacity:.7">'+e.message+'</small></span>';
+      rEl.style.display='';
+      document.getElementById('v_ds').value=0;
+      document.getElementById('v_du').value=0;
+      updateDefectSum();
+    } else {
+      scEl.innerHTML='<span class="al-ic">❌</span><span>認識できませんでした。再度撮影してください。<br><small style="opacity:.7">'+e.message+'</small></span>';
+    }
+    setBadge(i,'再撮影');
+    document.getElementById('bPrev').disabled=cur===0;
+    document.getElementById('bNext').disabled=false;
+    return;
+  }
+  if(timedOut) return;
+  clearTimeout(timeoutId);
+  scEl.style.display='none';
+  rEl.style.display='';
+  setBadge(i,'✓ 完了');
+  document.getElementById('bPrev').disabled=cur===0;
+  document.getElementById('bNext').disabled=false;
+  showConfirmDialog(i);
+  if(cur===6)rfV();
+  updNav();
+}
+
+async function rescan(i){
+  if(!S.b64[i])return;
+  document.getElementById('r'+i).style.display='none';
+  document.getElementById('sc'+i).className='scanning';
+  if(i===5){
+    await runOcrDefect();
+  } else {
+    await runOcr(i);
+  }
+}
+
+// 不良品専用OCR関数（シンプル・独立実装）
+async function runOcrDefect(){
+  if(!S.b64[5])return;
+  const scEl=document.getElementById('sc5');
+  const rEl=document.getElementById('r5');
+  scEl.style.display='';scEl.className='scanning';
+  rEl.style.display='none';
+  document.getElementById('bNext').disabled=true;
+  document.getElementById('bPrev').disabled=true;
+
+  // タイムアウト（50秒）
+  let done=false;
+  const tmr=setTimeout(()=>{
+    if(done) return;
+    done=true;
+    scEl.className='al ng';
+    scEl.innerHTML='<span class="al-ic">⏱</span><span>タイムアウトしました。数量を直接入力してください。</span>';
+    setBadge(5,'手入力');
+    rEl.style.display='';
+    document.getElementById('v_ds').value=0;
+    document.getElementById('v_du').value=0;
+    updateDefectSum();
+    document.getElementById('bPrev').disabled=cur===0;
+    document.getElementById('bNext').disabled=false;
+    updNav();
+  }, 50000);
+
+  try{
+    await new Promise((ok,ng)=>{
+      fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'ocr',b64:S.b64[5],type:'defect'})})
+      .then(r=>r.json())
+      .then(res=>{
+        if(done) return; done=true; clearTimeout(tmr);
+        if(!res.ok) throw new Error(res.error||'APIエラー');
+        const d=res.data;
+        S.ds=Number(d.stamped_count)||0;
+        S.du=Number(d.unstamped_count)||0;
+        document.getElementById('v_ds').value=S.ds;
+        document.getElementById('v_du').value=S.du;
+        updateDefectSum();
+        scEl.style.display='none'; rEl.style.display='';
+        setBadge(5,'✓ 完了');
+        document.getElementById('bPrev').disabled=cur===0;
+        document.getElementById('bNext').disabled=false;
+        updNav(); ok();
+      })
+      .catch(e=>{
+        if(done) return; done=true; clearTimeout(tmr);
+        ng(new Error(e.message||'通信エラー'));
+      });
+    });
+  }catch(e){
+    if(done) return;
+    done=true;
+    clearTimeout(tmr);
+    scEl.className='al ng';
+    scEl.innerHTML='<span class="al-ic">❌</span><span>認識できませんでした。数量を直接入力してください。<br><small>'+e.message+'</small></span>';
+    setBadge(5,'手入力');
+    rEl.style.display='';
+    document.getElementById('v_ds').value=0;
+    document.getElementById('v_du').value=0;
+    updateDefectSum();
+    document.getElementById('bPrev').disabled=cur===0;
+    document.getElementById('bNext').disabled=false;
+    updNav();
+  }
+}
+
+// ② 認識結果確認ダイアログ
+function showConfirmDialog(i){
+  // 既存の確認バナーを削除
+  const old=document.getElementById('confirmBanner'+i);
+  if(old) old.remove();
+  const rEl=document.getElementById('r'+i);
+  if(!rEl||rEl.style.display==='none') return;
+  const banner=document.createElement('div');
+  banner.id='confirmBanner'+i;
+  banner.className='al info';
+  banner.style.marginTop='10px';
+  banner.innerHTML=
+    '<span class="al-ic">👁️</span>'+
+    '<div style="flex:1">'+
+      '<div style="font-size:clamp(10px,3.1vw,12px);font-weight:700;margin-bottom:8px">認識結果を確認してください</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button onclick="confirmOcr('+i+')" style="flex:1;padding:12px 8px;border-radius:8px;background:var(--ok);color:#fff;font-size:clamp(10px,3.1vw,12px);font-weight:700;font-family:var(--sans);border:none;cursor:pointer;">✅ 確認して次へ</button>'+
+        '<button onclick="retakeOcr('+i+')" style="flex:1;padding:12px 8px;border-radius:8px;background:var(--ng);color:#fff;font-size:clamp(10px,3.1vw,12px);font-weight:700;font-family:var(--sans);border:none;cursor:pointer;">📷 撮り直す</button>'+
+      '</div>'+
+    '</div>';
+  rEl.after(banner);
+}
+
+function confirmOcr(i){
+  const banner=document.getElementById('confirmBanner'+i);
+  if(banner){
+    banner.className='al ok';
+    banner.innerHTML='<span class="al-ic">✅</span><span>確認済み</span>';
+  }
+  // 次のタブへ自動で進む（最終タブ以外）
+  if(cur<TOTAL-1) setTimeout(()=>next(),400);
+}
+
+function retakeOcr(i){
+  const banner=document.getElementById('confirmBanner'+i);
+  if(banner) banner.remove();
+  trig(i);
+}
+
+// ==============================
+// 段ボール 自動判別
+// ==============================
+function trigAuto(){
+  openCam(0, (b64, dataUrl) => {
+    S.b64[0]=b64; S.url[0]=dataUrl;
+    document.getElementById('p0auto').style.display='none';
+    document.getElementById('im0auto').src=dataUrl;
+    document.getElementById('pv0auto').style.display='';
+    savePhotoToDrive(0);
+    runOcrDetect();
+  });
+}
+
+function retryAuto(){
+  // リセットして撮り直し
+  S.cartonType=0;
+  S.b64[0]=null; S.url[0]=null;
+  S.dbName=null;S.dbLot=null;S.dbLotLine1=null;S.dbLotLine2=null;S.dbCode=null;
+  S.lbCode=null;S.lbName=null;S.lbAlpha=null;S.lbDate=null;
+  document.getElementById('p0auto').style.display='';
+  document.getElementById('pv0auto').style.display='none';
+  document.getElementById('z0auto').classList.remove('ok');
+  document.getElementById('typeResult').style.display='none';
+  document.getElementById('ctCraft').style.display='none';
+  document.getElementById('ctLabel').style.display='none';
+  document.getElementById('sc0auto').style.display='none';
+  setBadge(0,'未撮影');
+}
+
+async function onCapAuto(inp){
+  if(!inp.files||!inp.files[0])return;
+  const file=inp.files[0];
+  // プレビュー表示
+  S.url[0]=URL.createObjectURL(file);
+  S.b64[0]=await compress(file,800,0.75);
+  document.getElementById('p0auto').style.display='none';
+  document.getElementById('pv0auto').style.display='';
+  document.getElementById('im0auto').src=S.url[0];
+  document.getElementById('z0auto').classList.add('ok');
+  // STEP1: 種類判別
+  await runOcrDetect();
+}
+
+async function runOcrDetect(){
+  const scEl=document.getElementById('sc0auto');
+  scEl.style.display='';scEl.className='scanning';
+  document.getElementById('typeResult').style.display='none';
+  try{
+    await new Promise((ok,ng)=>{
+      fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'ocr',b64:S.b64[0],type:'detect_and_ocr'})})
+      .then(r=>r.json()).then(res=>{if(res.ok){applyDetectAndOcr(res.data);ok();}else ng(new Error(res.error||'APIエラー'));})
+      .catch(e=>ng(new Error(e.message||'通信エラー')));
+    });
+  }catch(e){
+    scEl.className='al ng';
+    scEl.innerHTML='<span class="al-ic">❌</span><span>判別できませんでした。再度撮影してください。（'+e.message+'）</span>';
+    setBadge(0,'再撮影');
+    return;
+  }
+  scEl.style.display='none';
+}
+
+function applyDetectAndOcr(d){
+  // 判別＋認証が1回のAPIで返ってくる
+  const t = d.carton_type; // 1=印字あり 2=無地
+  S.cartonType=t;
+  // 判別結果バナー表示
+  const res=document.getElementById('typeResult');
+  const icon=document.getElementById('typeIcon');
+  const name=document.getElementById('typeName');
+  const desc=document.getElementById('typeDesc');
+  if(t===1){
+    res.className='al ok'; icon.textContent='📦';
+    name.textContent='段ボール（印字あり）と判別しました';
+    desc.textContent='品名・製造ロット・品番を認識しました';
+    document.getElementById('ctCraft').style.display='';
+    document.getElementById('ctLabel').style.display='none';
+    // 認証結果を直接適用（2回目のAPI呼び出し不要）
+    S.dbName=d.product_name||'';
+    S.dbLotLine1=d.lot_line1||'';
+    S.dbLotLine2=d.lot_line2||'';
+    S.dbLot=d.lot||(S.dbLotLine1+' '+S.dbLotLine2).trim();
+    S.dbCode=d.item_code||'';
+    document.getElementById('db_name').textContent=S.dbName||'--';
+    document.getElementById('db_lot').textContent=S.dbLot||'--';
+    document.getElementById('db_code').textContent=S.dbCode||'--';
+    document.getElementById('sc0').style.display='none';
+    document.getElementById('r0').style.display='';
+    document.getElementById('b0craft').textContent='✓ 完了';
+    document.getElementById('b0craft').className='cd-st st-d';
+  } else {
+    res.className='al info'; icon.textContent='📦';
+    name.textContent='段ボール（無地）と判別しました';
+    desc.textContent='ラベルシールの品番・品名・ロット・製造日付を認識しました';
+    document.getElementById('ctCraft').style.display='none';
+    document.getElementById('ctLabel').style.display='';
+    // 認証結果を直接適用（2回目のAPI呼び出し不要）
+    S.lbCode=d.item_code||'';
+    S.lbName=d.product_name||'';
+    S.lbAlpha=d.lot_alpha||'';
+    S.lbDate=d.mfg_date||'';
+    document.getElementById('lb_code').textContent=S.lbCode||'--';
+    document.getElementById('lb_name').textContent=S.lbName||'--';
+    document.getElementById('lb_lot_alpha').textContent=S.lbAlpha||'--';
+    document.getElementById('lb_date').textContent=S.lbDate||'--';
+    document.getElementById('sc0L').style.display='none';
+    document.getElementById('r0L').style.display='';
+    document.getElementById('b0label').textContent='✓ 完了';
+    document.getElementById('b0label').className='cd-st st-d';
+  }
+  res.style.display='';
+  applyMatchLayout(t);
+  setBadge(0,'✓ 完了');
+  rfV();
+}
+
+function applyMatchLayout(t){
+  if(t===1){
+    document.getElementById('vc_alpha').style.display='none';
+    document.getElementById('vc_date').style.display='none';
+    document.getElementById('vf_code').textContent='品番　段ボール ＝ 化粧箱バーコード上の印刷字';
+    document.getElementById('vf_lot').textContent='製造ロット　段ボール ＝ 化粧箱製造ロット';
+    document.getElementById('vc_lot').style.display='';
+  } else {
+    document.getElementById('vc_alpha').style.display='';
+    document.getElementById('vc_date').style.display='';
+    document.getElementById('vf_code').textContent='品番　ラベル ＝ 化粧箱バーコード上の印刷字';
+    document.getElementById('vf_lot').textContent='製造ロット(全体)　ラベル日付+ABC ＝ 化粧箱製造ロット';
+  }
+}
+
+// 印字あり OCR
+async function runOcrCraft(){
+  const scEl=document.getElementById('sc0');
+  const rEl=document.getElementById('r0');
+  scEl.style.display='';scEl.className='scanning';
+  rEl.style.display='none';
+  try{
+    await new Promise((ok,ng)=>{
+      fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'ocr',b64:S.b64[0],type:'carton'})})
+      .then(r=>r.json()).then(res=>{if(res.ok){applyOcr(0,res.data);ok();}else ng(new Error(res.error||'APIエラー'));})
+      .catch(e=>ng(new Error(e.message||'通信エラー')));
+    });
+  }catch(e){
+    scEl.className='al ng';
+    scEl.innerHTML='<span class="al-ic">❌</span><span>認識できませんでした。撮り直してください。（'+e.message+'）</span>';
+    document.getElementById('b0craft').textContent='再撮影';
+    return;
+  }
+  scEl.style.display='none'; rEl.style.display='';
+  document.getElementById('b0craft').textContent='✓ 完了';
+  document.getElementById('b0craft').className='cd-st st-d';
+  setBadge(0,'✓ 完了');
+  rfV();
+}
+
+// 無地 OCR
+async function runOcrLabel(){
+  const scEl=document.getElementById('sc0L');
+  const rEl=document.getElementById('r0L');
+  scEl.style.display='';scEl.className='scanning';
+  rEl.style.display='none';
+  try{
+    await new Promise((ok,ng)=>{
+      fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'ocr',b64:S.b64[0],type:'label'})})
+      .then(r=>r.json()).then(res=>{if(res.ok){applyOcrLabel(res.data);ok();}else ng(new Error(res.error||'APIエラー'));})
+      .catch(e=>ng(new Error(e.message||'通信エラー')));
+    });
+  }catch(e){
+    scEl.className='al ng';
+    scEl.innerHTML='<span class="al-ic">❌</span><span>認識できませんでした。撮り直してください。（'+e.message+'）</span>';
+    document.getElementById('b0label').textContent='再撮影';
+    return;
+  }
+  scEl.style.display='none'; rEl.style.display='';
+  document.getElementById('b0label').textContent='✓ 完了';
+  document.getElementById('b0label').className='cd-st st-d';
+  setBadge(0,'✓ 完了');
+  rfV();
+}
+
+function applyOcrLabel(d){
+  S.lbCode=d.item_code||'';
+  S.lbName=d.product_name||'';
+  S.lbAlpha=d.lot_alpha||'';
+  S.lbDate=d.mfg_date||'';
+  document.getElementById('lb_code').textContent=S.lbCode||'--';
+  document.getElementById('lb_name').textContent=S.lbName||'--';
+  document.getElementById('lb_lot_alpha').textContent=S.lbAlpha||'--';
+  document.getElementById('lb_date').textContent=S.lbDate||'--';
+  rfV();
+}
+
+function applyOcr(i,d){
+  if(i===0){
+    // 段ボール
+    S.dbName=d.product_name||'';
+    S.dbLotLine1=d.lot_line1||'';
+    S.dbLotLine2=d.lot_line2||'';
+    S.dbLot=d.lot||(S.dbLotLine1+' '+S.dbLotLine2).trim();
+    S.dbCode=d.item_code||'';
+    document.getElementById('db_name').textContent=S.dbName||'--';
+    document.getElementById('db_lot').textContent=S.dbLot||'--';
+    document.getElementById('db_code').textContent=S.dbCode||'--';
+  } else if(i===1){
+    // 化粧箱バーコード
+    S.bcNum='';
+    S.bcCode=d.item_code||'';
+    document.getElementById('bc_code').textContent=S.bcCode||'--';
+  } else if(i===2){
+    // 化粧箱製造ロット
+    S.lot=d.lot_full||(d.lot_line1||'')+' '+(d.lot_line2||'');
+    S.ll1=d.lot_line1||''; S.ll2=d.lot_line2||'';
+    document.getElementById('lv').textContent=S.lot||'読み取り失敗';
+    document.getElementById('ls').textContent='上段：'+S.ll1+'　下段：'+S.ll2;
+  } else if(i===3){
+    S.pr=d.print_count;
+    setRv('v_p','i_p',S.pr);
+  } else if(i===4){
+    S.ps=d.pass_count; S.gd=d.good_count; S.df=d.defect_count;
+    setRv('v_q','i_q',S.ps); setRv('v_g','i_g',S.gd); setRv('v_d','i_d',S.df);
+  } else if(i===5){
+    S.ds=Number(d.stamped_count)||0;
+    S.du=Number(d.unstamped_count)||0;
+    // 手入力フィールドにセット
+    document.getElementById('v_ds').value=S.ds;
+    document.getElementById('v_du').value=S.du;
+    updateDefectSum();
+  }
+  rfV();
+}
+
+function setRv(vid,iid,val){
+  const v=document.getElementById(vid),ic=document.getElementById(iid);
+  const ok=val!==null&&val!==undefined&&!isNaN(val);
+  v.textContent=ok?val:'?'; v.className=ok?'rv':'rv nd';
+  ic.textContent=ok?'✓':'!'; ic.className=ok?'ri ok':'ri ng';
+}
+
+function setBadge(i,txt){
+  const b=document.getElementById('b'+i);
+  if(!b)return;
+  b.textContent=txt;
+  b.className='cd-st '+(txt==='✓ 完了'?'st-d':'st-w');
+}
+
+// 写真6枚を一括でダウンロード保存
+async function saveAllPhotos(){
+  const names=['段ボール','化粧箱品番','化粧箱製造ロット','インクジェッター','タブレット','不良品'];
+  const btn=document.getElementById('btnSavePhotos');
+  btn.disabled=true;
+  btn.textContent='📥 保存中...';
+  const now=new Date();
+  const ts=now.getFullYear()+''+String(now.getMonth()+1).padStart(2,'0')+''+String(now.getDate()).padStart(2,'0');
+  let saved=0;
+  for(let i=0;i<6;i++){
+    const b64=S.b64[i];
+    if(!b64) continue;
+    try{
+      const binary=atob(b64);
+      const arr=new Uint8Array(binary.length);
+      for(let j=0;j<binary.length;j++) arr[j]=binary.charCodeAt(j);
+      const blob=new Blob([arr],{type:'image/jpeg'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      // ファイル名：製造ロット日付_アルファベット_ステップ名
+      const lotDate = (S.ll1||'').replace(/\./g,'').replace(/\//g,'').trim() || ts;
+      const lotAlpha = (S.ll2||S.lbAlpha||'').trim();
+      const prefix = lotAlpha ? lotDate+'_'+lotAlpha : lotDate;
+      a.download=prefix+'_'+names[i]+'.jpg';
+      a.style.display='none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      saved++;
+      // 1枚ずつ間隔を空けて保存（アプリが落ちるのを防ぐ）
+      await new Promise(r=>setTimeout(r, 800));
+      URL.revokeObjectURL(url);
+      btn.textContent='📥 保存中... '+saved+'/'+[...Array(6)].filter((_,k)=>S.b64[k]).length+'枚';
+    }catch(e){ console.log('保存エラー:',e); }
+  }
+  if(saved>0){
+    document.getElementById('photoSaveResult').style.display='';
+    document.getElementById('photoSaveMsg').textContent=saved+'枚の写真を保存しました。スプレッドシートへの保存・送信を自動で実行します...';
+    const btn2=document.getElementById('btnSavePhotos');
+    btn2.style.background='var(--ok)';
+    btn2.style.backgroundImage='none';
+    btn2.textContent='✅ '+saved+'枚の写真を保存済み';
+    btn2.disabled=false;
+    S.photosSaved=true;
+    const pw=document.getElementById('photoWarn');
+    if(pw) pw.style.display='none';
+    updNav();
+    // 写真保存完了後に自動で保存・送信を実行
+    setTimeout(()=>{
+      doSave();
+    }, 1500);
+  } else {
+    const btn2=document.getElementById('btnSavePhotos');
+    btn2.disabled=false;
+    btn2.textContent='📥 撮影写真を端末に保存する（6枚）';
+  }
+}
+
+// ハイフンを除去して比較用に正規化
+function normalizeCode(str){
+  return (str||'').replace(/-/g,'').trim();
+}
+
+// 不良品数の手入力時にSオブジェクトとUIを更新
+function onDefectInput(){
+  S.ds = parseInt(document.getElementById('v_ds').value)||0;
+  S.du = parseInt(document.getElementById('v_du').value)||0;
+  if(S.ds<0){S.ds=0;document.getElementById('v_ds').value=0;}
+  if(S.du<0){S.du=0;document.getElementById('v_du').value=0;}
+  updateDefectSum();
+  rfV();
+}
+
+function updateDefectSum(){
+  const ds = parseInt(document.getElementById('v_ds').value)||0;
+  const du = parseInt(document.getElementById('v_du').value)||0;
+  const sumEl = document.getElementById('v_df_sum');
+  if(sumEl) sumEl.textContent = ds + du;
+}
+
+// 日付の区切り文字（/ . - スペース）を除去して照合用に正規化
+// 例) 2026/05/19 → 20260519、2026.05.19 → 20260519
+function normalizeDate(str){
+  return (str||'').replace(/[\/\.\-\s]/g,'').trim();
+}
+
+function rfV(){
+  // 照合チェック（段ボール種類に応じて切替）
+  let matchAllOK = true;
+  if(S.cartonType===1){
+    // 段ボール（印字あり）照合
+    if(S.dbCode&&S.bcCode){
+      const codeOK=normalizeCode(S.dbCode)===normalizeCode(S.bcCode);
+      setVc('vc_code','vr_code',codeOK,'段ボール：'+S.dbCode+'　化粧箱：'+S.bcCode);
+      if(!codeOK)matchAllOK=false;
+    }
+    if(S.dbLot&&S.lot){
+      const lotOK=S.dbLot.trim()===S.lot.trim();
+      setVc('vc_lot','vr_lot',lotOK,'段ボール：'+S.dbLot+'　化粧箱：'+S.lot);
+      if(!lotOK)matchAllOK=false;
+    }
+  } else if(S.cartonType===2){
+    // 段ボール（無地）照合
+    if(S.lbCode&&S.bcCode){
+      const codeOK=normalizeCode(S.lbCode)===normalizeCode(S.bcCode);
+      setVc('vc_code','vr_code',codeOK,'ラベル：'+S.lbCode+'　化粧箱：'+S.bcCode);
+      if(!codeOK)matchAllOK=false;
+    }
+    if(S.lbAlpha&&S.ll2){
+      const alphaOK=S.lbAlpha.trim()===S.ll2.trim();
+      setVc('vc_alpha','vr_alpha',alphaOK,'ラベル：'+S.lbAlpha+'　化粧箱下段：'+S.ll2);
+      if(!alphaOK)matchAllOK=false;
+    }
+    if(S.lbDate&&S.ll1){
+      const dateOK=normalizeDate(S.lbDate)===normalizeDate(S.ll1);
+      setVc('vc_date','vr_date',dateOK,'ラベル：'+S.lbDate+'　化粧箱上段：'+S.ll1);
+      if(!dateOK)matchAllOK=false;
+    }
+  }
+
+  // 員数チェック
+  const{pr,ps,gd,df,ds,du}=S;
+  const allNum=[pr,ps,gd,df,ds,du].every(v=>v!==null&&v!==undefined&&!isNaN(v));
+  if(!allNum){
+    ['vr1','vr2','vr3'].forEach(id=>{
+      const e=document.getElementById(id);
+      e.textContent='数値の入力待ち';e.className='vr nd';
+    });
+    ['vc1','vc2','vc3'].forEach(id=>document.getElementById(id).className='vc');
+    document.getElementById('aOK').style.display='none';
+    document.getElementById('aNG').style.display='none';
+    return;
+  }
+  const r1=Number(pr)===Number(gd)+Number(df)-Number(du);
+  const r2=Number(ps)===Number(gd)+Number(df);
+  const r3=Number(df)===Number(ds)+Number(du);
+  setVc('vc1','vr1',r1,'① '+pr+' ＝ ③ '+gd+' ＋ ④ '+df+' － ⑥ '+du+'　→　'+(Number(gd)+Number(df)-Number(du)));
+  setVc('vc2','vr2',r2,'② '+ps+' ＝ ③ '+gd+' ＋ ④ '+df+'　→　'+(Number(gd)+Number(df)));
+  setVc('vc3','vr3',r3,'④ '+df+' ＝ ⑤ '+ds+' ＋ ⑥ '+du+'　→　'+(Number(ds)+Number(du)));
+
+  const allOK=r1&&r2&&r3&&matchAllOK;
+  document.getElementById('aOK').style.display=allOK?'':'none';
+  document.getElementById('aNG').style.display=allOK?'none':'';
+  buildSm();
+}
+
+function setVc(cid,rid,ok,detail){
+  document.getElementById(cid).className='vc '+(ok?'ok':'ng');
+  const r=document.getElementById(rid);
+  r.textContent=(ok?'✅ 一致 — ':'❌ 不一致 — ')+detail;
+  r.className='vr '+(ok?'ok':'ng');
+}
+
+function buildSm(){
+  document.getElementById('smCard').style.display='';
+  if(S.cartonType===1){
+    document.getElementById('sm_db_title').textContent='段ボール（印字あり）';
+    document.getElementById('sm_db_craft').style.display='';
+    document.getElementById('sm_db_label').style.display='none';
+    document.getElementById('sm_db_name').textContent=S.dbName||'--';
+    document.getElementById('sm_db_lot').textContent=S.dbLot||'--';
+    document.getElementById('sm_db_code').textContent=S.dbCode||'--';
+  } else if(S.cartonType===2){
+    document.getElementById('sm_db_title').textContent='段ボール（無地）';
+    document.getElementById('sm_db_craft').style.display='none';
+    document.getElementById('sm_db_label').style.display='';
+    document.getElementById('sm_lb_code').textContent=S.lbCode||'--';
+    document.getElementById('sm_lb_name').textContent=S.lbName||'--';
+    document.getElementById('sm_lb_alpha').textContent=S.lbAlpha||'--';
+    document.getElementById('sm_lb_date').textContent=S.lbDate||'--';
+  }
+  document.getElementById('sm_bc_code').textContent=S.bcCode||'--';
+  document.getElementById('sm_lot').textContent=S.lot||'--';
+  const rows=[['① 印字回数',S.pr],['② 検査通過数',S.ps],['③ 良品数',S.gd],
+              ['④ 不良数',S.df],['⑤ 印字あり不良品',S.ds],['⑥ 印字なし不良品',S.du]];
+  document.getElementById('smGrid').innerHTML=rows.map(([l,v])=>
+    '<div class="sc2"><div class="sc2-l">'+l+'</div><div class="sc2-v">'+(v??'--')+'</div></div>'
+  ).join('');
+}
+
+function openSave(){
+  // ③ 不一致がある場合は不一致理由の記入を必須化
+  const aNG=document.getElementById('aNG');
+  const hasNG=aNG&&aNG.style.display!=='none';
+  if(hasNG){
+    const remarks=document.getElementById('remarks').value.trim();
+    if(!remarks){
+      const remarksEl=document.getElementById('remarks');
+      remarksEl.style.borderColor='var(--ng)';
+      remarksEl.focus();
+      remarksEl.scrollIntoView({behavior:'smooth',block:'center'});
+      const w=document.getElementById('remarksWarn');
+      if(!w){
+        const warn=document.createElement('div');
+        warn.id='remarksWarn';
+        warn.className='al ng';
+        warn.style.marginTop='8px';
+        warn.innerHTML='<span class="al-ic">❌</span><span>照合または員数チェックに不一致があります。<br><strong>不一致理由</strong> の記入が必須です。</span>';
+        remarksEl.parentNode.appendChild(warn);
+      }
+      setTimeout(()=>{
+        remarksEl.style.borderColor='';
+        const w=document.getElementById('remarksWarn');
+        if(w) w.remove();
+      },4000);
+      return;
+    }
+  }
+  // メールアドレスはGASのスクリプトプロパティ（NOTIFY_EMAIL）を使用
+  document.getElementById('modal').style.display='';
+  doSave('');
+}
+
+function doSave(email){
+  const payload={
+    email,
+    remarks:document.getElementById('remarks').value.trim(),
+    actions:document.getElementById('actions').value.trim(),
+    // 写真データ（各ステップの撮影画像）
+    photos:{
+      carton:  S.b64[0] || null,  // 段ボール
+      barcode: S.b64[1] || null,  // 化粧箱バーコード
+      lot:     S.b64[2] || null,  // 化粧箱製造ロット
+      inkjet:  S.b64[3] || null,  // インクジェッター
+      tablet:  S.b64[4] || null,  // タブレット
+      defect:  S.b64[5] || null,  // 不良品
+    },
+    results:{
+      // 段ボール
+      cartonType:S.cartonType,
+      dbName:S.dbName, dbLot:S.dbLot, dbLotLine1:S.dbLotLine1, dbLotLine2:S.dbLotLine2, dbCode:S.dbCode,
+      lbCode:S.lbCode, lbName:S.lbName, lbAlpha:S.lbAlpha, lbDate:S.lbDate,
+      // 化粧箱
+      bcNum:S.bcNum, bcCode:S.bcCode,
+      lotFull:S.lot, lotLine1:S.ll1, lotLine2:S.ll2,
+      // 員数
+      print:S.pr, pass:S.ps, good:S.gd, defect:S.df,
+      defectStamped:S.ds, defectUnstamped:S.du
+    }
+  };
+  if(IS_GAS){
+    // GAS iframe内（iPhone/iPad Safari）
+    fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'save',data:payload})})
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.ok&&res.data&&res.data.success) showOK(res.data.url||'');
+      else showErr(res.error||'保存に失敗しました');
+    })
+    .catch(e=>showErr(e.message||'通信エラー'));
+  } else {
+    // fetch API（Android Chrome等）
+    fetch(GAS_URL,{method:'POST',redirect:'follow',mode:'cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'save',data:payload})})
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.ok&&res.data&&res.data.success) showOK(res.data.url||'');
+      else showErr(res.error||'保存に失敗しました');
+    })
+    .catch(e=>showErr(e.message||'通信エラーが発生しました'));
+  }
+}
+
+function showOK(url){
+  document.getElementById('mBody').innerHTML=
+    '<div class="al ok" style="flex-direction:column;align-items:center;text-align:center;padding:24px 16px;gap:14px">'+
+      '<span style="font-size:clamp(10px,3.1vw,12px)">✅</span>'+
+      '<div style="font-size:clamp(10px,3.1vw,12px);font-weight:700">作業が完了しました</div>'+
+      '<div style="font-size:clamp(10px,3.1vw,12px);color:var(--tx2)">スプレッドシートへの保存・送信が完了しました</div>'+
+    '</div>'+
+    '<div class="al info" style="margin-top:12px;justify-content:center">'+
+      '<span class="al-ic">🗑️</span>'+
+      '<span style="font-size:clamp(10px,3.1vw,12px)">作業データを削除しています...</span>'+
+    '</div>';
+  // 2秒後に自動でデータ削除→STEP01
+  setTimeout(function(){
+    startNewLot();
+    closeModal();
+  }, 2000);
+}
+function showErr(msg){
+  // 撮影済み写真のリスト作成
+  var photoNames = ['段ボール','化粧箱バーコード','化粧箱製造ロット','インクジェッター','タブレット','不良品'];
+  var savedPhotos = [];
+  // 段ボール写真（自動判別で使用したb64[0]）
+  if(S.b64[0]) savedPhotos.push({name: photoNames[0], b64: S.b64[0]});
+  for(var i=1;i<6;i++){
+    if(S.b64[i]) savedPhotos.push({name: photoNames[i], b64: S.b64[i]});
+  }
+  // ラベル段ボールの場合はlbB64も保存済みのb64[0]と同じ
+
+  var btnHtml = '';
+  if(savedPhotos.length > 0){
+    btnHtml =
+      '<div class="al warn" style="margin-top:12px">' +
+        '<span class="al-ic">⚠️</span>' +
+        '<span>写真をサーバーに送れませんでした。<br>下のボタンをタップして撮影した写真を端末に保存してください。</span>' +
+      '</div>' +
+      '<button onclick="savePhotosToDevice()" style="' +
+        'width:100%;margin-top:12px;padding:14px;border-radius:10px;' +
+        'background:linear-gradient(135deg,#F0A020,#E08010);color:#fff;' +
+        'font-size:clamp(10px,3.1vw,12px);font-weight:700;font-family:var(--sans);border:none;cursor:pointer;' +
+        'display:flex;align-items:center;justify-content:center;gap:8px;">' +
+        '📥 写真を端末に保存する（' + savedPhotos.length + '枚）' +
+      '</button>';
+  }
+
+  document.getElementById('mBody').innerHTML =
+    '<div class="al ng"><span class="al-ic">❌</span>' +
+    '<span>保存に失敗しました。<br><small style="font-size:clamp(10px,3.1vw,12px);opacity:.8">' + msg + '</small></span></div>' +
+    btnHtml;
+}
+
+// 撮影写真を1枚ずつ端末にダウンロード保存
+function savePhotosToDevice(){
+  var photoNames = ['段ボール','化粧箱バーコード','化粧箱製造ロット','インクジェッター','タブレット','不良品'];
+  var saved = 0;
+  for(var i=0;i<6;i++){
+    var b64 = S.b64[i];
+    if(!b64) continue;
+    try{
+      // base64をBlobに変換してダウンロード
+      var binary = atob(b64);
+      var arr = new Uint8Array(binary.length);
+      for(var j=0;j<binary.length;j++) arr[j] = binary.charCodeAt(j);
+      var blob = new Blob([arr], {type:'image/jpeg'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      var now = new Date();
+      var ts = now.getFullYear()+''+String(now.getMonth()+1).padStart(2,'0')+''+String(now.getDate()).padStart(2,'0');
+      a.download = ts + '_' + photoNames[i] + '.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      saved++;
+    }catch(e){
+      console.log('保存エラー:', e);
+    }
+  }
+  if(saved > 0){
+    document.getElementById('mBody').innerHTML +=
+      '<div class="al ok" style="margin-top:10px">' +
+        '<span class="al-ic">✅</span>' +
+        '<span>' + saved + '枚の写真を保存しました。<br>' +
+        '<small style="font-size:clamp(10px,3.1vw,12px)">※ iPhoneの場合は「ファイル」アプリの「ダウンロード」フォルダに保存されます</small>' +
+        '</span>' +
+      '</div>';
+  }
+}
+function closeModal(){document.getElementById('modal').style.display='none';}
+
+// ==============================
+// ブラウザ内カメラ（静止検知式自動シャッター）
+// ==============================
+const CAM_GUIDES = [
+  { w:88, h:72, msg:'段ボール全体が枠内に収まるように撮影してください' },
+  { w:85, h:38, msg:'バーコード上の品番を枠内中央に合わせてください' },
+  { w:85, h:35, msg:'製造ロット2行を枠内中央に合わせてください' },
+  { w:78, h:58, msg:'印字回数の数値が枠内に収まるように撮影してください' },
+  { w:88, h:65, msg:'検査通過数・良品数・不良数の3つが枠内に収まるように' },
+  { w:92, h:75, msg:'印字あり・印字なしの両エリアが枠内に収まるように' },
+];
+
+let camStream=null, camStepIdx=-1, camCallback=null;
+let motionTimer=null, motionCanvas=null, motionCtx=null, lastFrame=null;
+let camReady=false;
+
+async function openCam(stepIdx, callback){
+  camStepIdx=stepIdx; camCallback=callback; camReady=false;
+  document.getElementById('camModal').style.display='flex';
+  const guide=CAM_GUIDES[stepIdx]||CAM_GUIDES[0];
+  const video=document.getElementById('camVideo');
+  document.getElementById('camGuideMsg').textContent=guide.msg;
+  document.getElementById('camStatus').textContent='📷 カメラを起動中...';
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false
+    });
+    video.srcObject=camStream;
+    video.onloadedmetadata=()=>{
+      video.play();
+      requestAnimationFrame(()=>{
+        const vw=video.offsetWidth, vh=video.offsetHeight;
+        const box=document.getElementById('camGuideBox');
+        const bw=vw*guide.w/100, bh=vh*guide.h/100;
+        box.style.width=bw+'px'; box.style.height=bh+'px';
+        box.style.left=((vw-bw)/2)+'px'; box.style.top=((vh-bh)/2)+'px';
+        motionCanvas=document.createElement('canvas');
+        motionCanvas.width=64; motionCanvas.height=36;
+        motionCtx=motionCanvas.getContext('2d');
+        lastFrame=null;
+        setTimeout(()=>{ camReady=true; startMotionDetect(); }, 1000);
+        document.getElementById('camStatus').textContent='📷 枠内に合わせて静止してください';
+      });
+    };
+  }catch(e){
+    alert('カメラを起動できませんでした。\nカメラへのアクセスを許可してください。');
+    closeCam();
+  }
+}
+
+function startMotionDetect(){
+  if(!camStream||!camReady) return;
+  const video=document.getElementById('camVideo');
+  let stableFrames=0;
+  const STABLE_NEEDED=15; // 50ms×15=約0.75秒静止で撮影
+  const DIFF_THRESHOLD=12; // 閾値を上げて静止しやすく
+  function detect(){
+    if(!camStream||!camReady) return;
+    motionCtx.drawImage(video,0,0,64,36);
+    const cur=motionCtx.getImageData(0,0,64,36).data;
+    if(lastFrame){
+      let diff=0;
+      for(let i=0;i<cur.length;i+=4){
+        diff+=Math.abs(cur[i]-lastFrame[i])+Math.abs(cur[i+1]-lastFrame[i+1])+Math.abs(cur[i+2]-lastFrame[i+2]);
+      }
+      diff/=(64*36*3);
+      if(diff<DIFF_THRESHOLD){
+        stableFrames++;
+        const pct=Math.min(100,Math.round(stableFrames/STABLE_NEEDED*100));
+        document.getElementById('camStatus').textContent='🔒 静止中... '+pct+'%';
+        if(stableFrames>=STABLE_NEEDED){
+          camReady=false;
+          flashAndShoot();
+          return;
+        }
+      } else {
+        stableFrames=0;
+        document.getElementById('camStatus').textContent='📷 枠内に合わせて静止してください';
+      }
+    }
+    lastFrame=new Uint8Array(cur);
+    motionTimer=setTimeout(detect,50);
+  }
+  detect();
+}
+
+function flashAndShoot(){
+  // フラッシュ演出
+  const flash=document.createElement('div');
+  flash.style.cssText='position:fixed;inset:0;background:#fff;z-index:9999;opacity:0.9;pointer-events:none';
+  document.body.appendChild(flash);
+  setTimeout(()=>flash.remove(),150);
+  // シャッター音
+  try{
+    const ac=new AudioContext();
+    const osc=ac.createOscillator();
+    const gain=ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.frequency.value=1200; gain.gain.value=0.3;
+    osc.start(); osc.stop(ac.currentTime+0.08);
+  }catch(e){}
+  setTimeout(()=>shootCam(),100);
+}
+
+function shootCam(){
+  const video=document.getElementById('camVideo');
+  const canvas=document.getElementById('camCanvas');
+  const guide=CAM_GUIDES[camStepIdx]||CAM_GUIDES[0];
+  const vw=video.videoWidth, vh=video.videoHeight;
+  const bw=Math.round(vw*guide.w/100), bh=Math.round(vh*guide.h/100);
+  const bx=Math.round((vw-bw)/2), by=Math.round((vh-bh)/2);
+  canvas.width=bw; canvas.height=bh;
+  canvas.getContext('2d').drawImage(video,bx,by,bw,bh,0,0,bw,bh);
+  const dataUrl=canvas.toDataURL('image/jpeg',0.85);
+  const b64=dataUrl.split(',')[1];
+  closeCam();
+  if(camCallback) camCallback(b64,dataUrl);
+}
+
+function closeCam(){
+  camReady=false;
+  if(motionTimer){ clearTimeout(motionTimer); motionTimer=null; }
+  if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  document.getElementById('camModal').style.display='none';
+}
+
+</script>
+</body>
+</html>
