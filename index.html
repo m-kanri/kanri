@@ -843,8 +843,8 @@ async function onCap(i,inp){
   if(!inp.files||!inp.files[0])return;
   const file=inp.files[0];
   S.url[i]=URL.createObjectURL(file);
-  // 不良品（i===5）のみ500px・品質70%、その他は1200px・品質85%
-  S.b64[i]=await compress(file, i===5 ? 500 : 1200, i===5 ? 0.70 : 0.85);
+  // 不良品（i===5）のみ400px・品質60%、その他は800px・品質75%
+  S.b64[i]=await compress(file, i===5 ? 400 : 800, i===5 ? 0.60 : 0.75);
   showPv(i);
   // 撮影直後にGoogleドライブに即時保存
   savePhotoToDrive(i);
@@ -1577,6 +1577,8 @@ function doSave(email){
       tablet:  null,
       defect:  null,
     },
+    // GoogleドライブのURL（各ステップ撮影時に保存済み）
+    driveUrls: S.driveUrls || {},
     results:{
       // 段ボール
       cartonType:S.cartonType,
@@ -1709,12 +1711,12 @@ function closeModal(){document.getElementById('modal').style.display='none';}
 // ブラウザ内カメラ（静止検知式自動シャッター）
 // ==============================
 const CAM_GUIDES = [
-  { w:88, h:72, msg:'段ボール全体が枠内に収まるように撮影してください' },
-  { w:85, h:38, msg:'バーコード上の品番を枠内中央に合わせてください' },
-  { w:85, h:35, msg:'製造ロット2行を枠内中央に合わせてください' },
-  { w:78, h:58, msg:'印字回数の数値が枠内に収まるように撮影してください' },
-  { w:88, h:65, msg:'検査通過数・良品数・不良数の3つが枠内に収まるように' },
-  { w:92, h:75, msg:'印字あり・印字なしの両エリアが枠内に収まるように' },
+  { w:70, h:55, msg:'段ボールの印字部分を枠内に大きく収めてください' },
+  { w:70, h:30, msg:'品番の文字を枠内に大きく収めてください' },
+  { w:70, h:28, msg:'製造ロットの文字を枠内に大きく収めてください' },
+  { w:60, h:45, msg:'印字回数の数値を枠内に大きく収めてください' },
+  { w:72, h:52, msg:'3つの数値を枠内に大きく収めてください' },
+  { w:80, h:65, msg:'印字あり・印字なし両エリアを枠内に収めてください' },
 ];
 
 let camStream=null, camStepIdx=-1, camCallback=null;
