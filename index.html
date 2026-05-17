@@ -843,8 +843,8 @@ async function onCap(i,inp){
   if(!inp.files||!inp.files[0])return;
   const file=inp.files[0];
   S.url[i]=URL.createObjectURL(file);
-  // 不良品（i===5）のみ400px・品質60%、その他は800px・品質75%
-  S.b64[i]=await compress(file, i===5 ? 400 : 800, i===5 ? 0.60 : 0.75);
+  // 不良品（i===5）のみ500px・品質70%、その他は1200px・品質85%
+  S.b64[i]=await compress(file, i===5 ? 500 : 1200, i===5 ? 0.70 : 0.85);
   showPv(i);
   // 撮影直後にGoogleドライブに即時保存
   savePhotoToDrive(i);
